@@ -19,7 +19,7 @@ builder.Services.AddOpenApi(options =>
         document.Info.Contact = new()
         {
             Name = "Support",
-            Email = "support@email.it"
+            Email = "support@email.com"
         };
 
         document.Info.License = new()
