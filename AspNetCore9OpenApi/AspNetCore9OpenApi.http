@@ -1,0 +1,6 @@
+@AspNetCore9OpenApi_HostAddress = http://localhost:5129
+
+GET {{AspNetCore9OpenApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
