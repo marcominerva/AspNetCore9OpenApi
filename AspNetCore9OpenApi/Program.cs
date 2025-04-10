@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi(options =>
 {
-    _ = options.AddDocumentTransformer((document, context, cancellationToken) =>
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
     {
         document.Info.Title = "My new API";
         document.Info.Contact = new()
@@ -33,7 +33,7 @@ builder.Services.AddOpenApi(options =>
         return Task.CompletedTask;
     });
 
-    _ = options.AddOperationTransformer<AcceptLanguageHeaderOperationTransfomer>();
+    options.AddOperationTransformer<AcceptLanguageHeaderOperationTransfomer>();
 });
 
 var cultures = new[] { "en", "it" };
@@ -49,6 +49,8 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseHttpsRedirection();
+
 app.MapOpenApi();
 
 app.UseSwaggerUI(options =>
@@ -58,7 +60,6 @@ app.UseSwaggerUI(options =>
 
 //app.MapScalarApiReference();
 
-app.UseHttpsRedirection();
 app.UseRequestLocalization();
 
 var summaries = new[]
@@ -82,7 +83,7 @@ app.MapGet("/weatherforecast", ([Description("The number of days")] int days = 5
 .WithSummary("Get the weather forecast")
 .WithDescription("The forecast for the next days");
 
-app.MapPost("/api/person", (Person person) =>
+app.MapPost("/api/person", ([Description("The person to create")] Person person) =>
 {
     return TypedResults.Ok(person);
 });
@@ -100,13 +101,14 @@ public class Person
     public string? Name { get; set; }
 
     [Description("The city where the person lives")]
+    [DefaultValue("Taggia")]
     public string? City { get; set; }
 }
 
 public class AcceptLanguageHeaderOperationTransfomer(IOptions<RequestLocalizationOptions> requestLocalizationOptions) : IOpenApiOperationTransformer
 {
     private readonly List<IOpenApiAny>? supportedLanguages = requestLocalizationOptions.Value
-        .SupportedCultures?.Select(c => new OpenApiString(c.TwoLetterISOLanguageName))
+        .SupportedCultures?.Select(c => new OpenApiString(c.Name))
         .Cast<IOpenApiAny>()
         .ToList();
 
